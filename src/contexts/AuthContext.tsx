@@ -11,13 +11,14 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  setToken: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<GitHubUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setTokenState] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // 로컬 스토리지에서 토큰 확인
     const savedToken = localStorage.getItem('github_app_token');
     if (savedToken) {
-      setToken(savedToken);
+      setTokenState(savedToken);
       setIsAuthenticated(true);
       refreshUser();
     }
@@ -45,6 +46,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const setToken = async (newToken: string) => {
+    try {
+      setTokenState(newToken);
+      setIsAuthenticated(true);
+      localStorage.setItem('github_app_token', newToken);
+      
+      // 토큰으로 사용자 정보 가져오기
+      const userData = await githubAppAPI.getUser(newToken);
+      setUser(userData);
+    } catch (error) {
+      console.error('토큰 설정 실패:', error);
+      alert('유효하지 않은 토큰입니다.');
+      logout();
+    }
+  };
+
   const login = () => {
     if (!GITHUB_APP_CONFIG.appId) {
       console.error('GitHub App ID가 설정되지 않았습니다.');
@@ -60,13 +77,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setUser(null);
-    setToken(null);
+    setTokenState(null);
     setIsAuthenticated(false);
     localStorage.removeItem('github_app_token');
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, logout, refreshUser, setToken }}>
       {children}
     </AuthContext.Provider>
   );
