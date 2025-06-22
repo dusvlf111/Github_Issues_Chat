@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginPage from '../pages/LoginPage/LoginPage';
 import ChatPage from '../pages/ChatPage/ChatPage';
+import AuthCallback from '../pages/AuthCallback/AuthCallback';
 import Loading from '../components/common/Loading/Loading';
 
 const AppRouter: React.FC = () => {
@@ -26,6 +27,10 @@ const AppRouter: React.FC = () => {
       <Route 
         path="/chat" 
         element={isAuthenticated ? <ChatPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/auth/callback" 
+        element={<AuthCallback />} 
       />
       <Route 
         path="/" 

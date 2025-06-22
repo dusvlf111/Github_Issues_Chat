@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { APP_CONFIG } from '../config/app';
 
 interface User {
   id: number;
@@ -36,11 +37,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = () => {
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/auth/callback`;
-    const scope = 'repo';
+    const clientId = APP_CONFIG.github.clientId;
+    const redirectUri = APP_CONFIG.github.redirectUri;
+    const scope = APP_CONFIG.github.scope;
     
-    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+    if (!clientId) {
+      console.error('GitHub Client ID가 설정되지 않았습니다.');
+      alert('GitHub OAuth 앱이 설정되지 않았습니다.');
+      return;
+    }
+    
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}`;
+    console.log('🔗 GitHub OAuth URL:', authUrl);
     window.location.href = authUrl;
   };
 
