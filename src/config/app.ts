@@ -23,11 +23,18 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
   
   const repoInfo = getRepositoryInfoFromURL();
   
-  // Redirect URI 생성 함수
+  // Redirect URI 생성 함수 - 개발/프로덕션 환경에 따라 고정값 사용
   function getRedirectUri(): string {
-    const origin = window.location.origin;
-    const basePath = import.meta.env.BASE_URL || '/';
-    return `${origin}${basePath}auth/callback`;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    
+    // 로컬 개발 환경
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `http://localhost:${port}/Github_Issues_Chat/auth/callback`;
+    }
+    
+    // 프로덕션 환경 (GitHub Pages)
+    return 'https://dusvlf111.github.io/Github_Issues_Chat/auth/callback';
   }
   
   export const APP_CONFIG = {
