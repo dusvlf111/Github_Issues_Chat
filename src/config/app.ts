@@ -23,6 +23,13 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
   
   const repoInfo = getRepositoryInfoFromURL();
   
+  // Redirect URI 생성 함수
+  function getRedirectUri(): string {
+    const origin = window.location.origin;
+    const basePath = import.meta.env.BASE_URL || '/';
+    return `${origin}${basePath}auth/callback`;
+  }
+  
   export const APP_CONFIG = {
     // 앱 기본 정보
     name: 'GitHub Issues Chat',
@@ -32,7 +39,7 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
     // GitHub 설정
     github: {
       clientId: import.meta.env.VITE_GITHUB_CLIENT_ID || '',
-      redirectUri: `${window.location.origin}/auth/callback`,
+      redirectUri: getRedirectUri(),
       scope: 'repo',
       
       // 현재 저장소 정보
@@ -113,5 +120,6 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
       owner: APP_CONFIG.github.repository.owner,
       name: APP_CONFIG.github.repository.name,
       issueNumber: APP_CONFIG.github.issueNumber,
+      redirectUri: APP_CONFIG.github.redirectUri,
     });
   }
