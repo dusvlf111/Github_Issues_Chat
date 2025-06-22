@@ -1,0 +1,96 @@
+.header {
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-primary);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    
+    &__container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-md) var(--spacing-lg);
+      max-width: 1200px;
+      margin: 0 auto;
+      
+      @media (max-width: 768px) {
+        padding: var(--spacing-sm) var(--spacing-md);
+      }
+    }
+    
+    &__brand {
+      display: flex;
+      flex-direction: column;
+      
+      @media (max-width: 640px) {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+    
+    &__title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.125rem;
+      
+      @media (max-width: 640px) {
+        font-size: 1.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    
+    &__subtitle {
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+      font-family: 'Monaco', 'Menlo', monospace;
+      
+      @media (max-width: 640px) {
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    
+    &__menu {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      
+      @media (max-width: 640px) {
+        gap: var(--spacing-sm);
+      }
+    }
+    
+    &__theme-toggle {
+      font-size: 1.25rem;
+      
+      @media (max-width: 640px) {
+        font-size: 1rem;
+      }
+    }
+    
+    &__user {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      
+      @media (max-width: 480px) {
+        display: none;
+      }
+    }
+    
+    &__username {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      
+      @media (max-width: 640px) {
+        display: none;
+      }
+    }
+  }

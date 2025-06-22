@@ -1,0 +1,105 @@
+.message-input {
+    &__form {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    &__field {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color var(--transition-fast);
+      
+      &:focus-within {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+      }
+    }
+    
+    &__textarea {
+      width: 100%;
+      min-height: 44px;
+      max-height: 200px;
+      padding: var(--spacing-md);
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.5;
+      resize: none;
+      overflow-y: auto;
+      
+      &:focus {
+        outline: none;
+      }
+      
+      &::placeholder {
+        color: var(--text-muted);
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+    
+    &__toolbar {
+      padding: var(--spacing-sm) var(--spacing-md);
+      background-color: var(--bg-tertiary);
+      border-top: 1px solid var(--border-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      
+      @media (max-width: 640px) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+      }
+    }
+    
+    &__info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      gap: var(--spacing-md);
+      
+      @media (max-width: 640px) {
+        order: 2;
+      }
+    }
+    
+    &__tip {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      
+      @media (max-width: 480px) {
+        display: none;
+      }
+    }
+    
+    &__counter {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      font-family: 'Monaco', 'Menlo', monospace;
+      
+      @media (max-width: 640px) {
+        font-size: 0.75rem;
+      }
+    }
+    
+    &__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      
+      @media (max-width: 640px) {
+        order: 1;
+        justify-content: space-between;
+      }
+    }
+  }
