@@ -1,8 +1,6 @@
-@use "sass:color";
-
 // Variables와 Reset import
-@import './_variables';
-@import './_reset';
+@import './variables';
+@import './reset';
 
 // 전역 스타일
 *,
