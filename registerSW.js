@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Github_Issues_Chat/sw.js', { scope: '/Github_Issues_Chat/' })})}
