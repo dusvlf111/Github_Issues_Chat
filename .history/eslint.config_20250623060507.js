@@ -6,10 +6,14 @@ import tseslint from '@typescript-eslint/eslint-plugin'
 import tsparser from '@typescript-eslint/parser'
 
 export default [
-  js.configs.recommended,
+  {
+    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts']
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
       parser: tsparser,
       parserOptions: {
         ecmaVersion: 'latest',
@@ -25,39 +29,35 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
+      ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-      '@typescript-eslint/no-unused-vars': 'warn',
+      
+      // TypeScript 관련 규칙
+      '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
-    },
-  },
-  {
-    files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      ecmaFeatures: {
-        jsx: true,
-      },
-    },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/ban-ts-comment': 'warn',
+      
+      // React 관련 규칙
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      
+      // 일반 규칙
+      'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+      'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+      'no-unused-vars': 'off', // TypeScript에서 처리
+      'prefer-const': 'error',
+      'no-var': 'error',
+      'object-shorthand': 'error',
+      'prefer-template': 'error',
     },
-  },
-  {
-    ignores: ['dist', 'node_modules', '*.config.js', '*.config.ts']
   },
   {
     files: ['**/*.js'],
