@@ -12,12 +12,18 @@ function App() {
   React.useEffect(() => {
     const errors = validateConfig();
     if (errors.length > 0) {
-      console.error('Configuration errors:', errors);
+      console.warn('Configuration warnings:', errors);
     }
   }, []);
 
   return (
-    <BrowserRouter basename="/">
+    <BrowserRouter 
+      basename={import.meta.env.BASE_URL || '/'}
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <ThemeProvider>
         <AuthProvider>
           <ChatProvider>

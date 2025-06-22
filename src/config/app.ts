@@ -16,8 +16,8 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
     
     // 로컬 개발 환경이거나 커스텀 도메인인 경우
     return {
-      owner: import.meta.env.VITE_GITHUB_REPO_OWNER || 'your-username',
-      name: import.meta.env.VITE_GITHUB_REPO_NAME || 'your-repo-name'
+      owner: import.meta.env.VITE_GITHUB_REPO_OWNER || 'demo-user',
+      name: import.meta.env.VITE_GITHUB_REPO_NAME || 'github-issues-chat'
     };
   }
   
@@ -90,20 +90,18 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
   export const validateConfig = (): string[] => {
     const errors: string[] = [];
     
-    if (!APP_CONFIG.github.repository.owner || APP_CONFIG.github.repository.owner === 'your-username') {
-      errors.push('GitHub 저장소 소유자 정보를 확인할 수 없습니다.');
-    }
-    
-    if (!APP_CONFIG.github.repository.name || APP_CONFIG.github.repository.name === 'your-repo-name') {
-      errors.push('GitHub 저장소 이름을 확인할 수 없습니다.');
-    }
-    
-    if (!APP_CONFIG.github.issueNumber || isNaN(APP_CONFIG.github.issueNumber)) {
-      errors.push('VITE_GITHUB_ISSUE_NUMBER가 올바르지 않습니다.');
-    }
-    
     if (!APP_CONFIG.github.clientId) {
-      errors.push('VITE_GITHUB_CLIENT_ID 환경 변수가 설정되지 않았습니다.');
+      errors.push('VITE_GITHUB_CLIENT_ID 환경 변수가 설정되지 않았습니다. (GitHub OAuth 앱을 생성하고 설정해주세요)');
+    }
+    
+    // 개발 환경에서는 저장소 정보가 기본값이어도 경고만 표시
+    if (import.meta.env.DEV) {
+      if (APP_CONFIG.github.repository.owner === 'demo-user') {
+        console.warn('개발 모드: GitHub 저장소 소유자를 설정해주세요 (VITE_GITHUB_REPO_OWNER)');
+      }
+      if (APP_CONFIG.github.repository.name === 'github-issues-chat') {
+        console.warn('개발 모드: GitHub 저장소 이름을 설정해주세요 (VITE_GITHUB_REPO_NAME)');
+      }
     }
     
     return errors;
