@@ -52,7 +52,8 @@ jobs:
         run: npm run build
         env:
           # GitHub Secrets에서 가져오는 환경변수들
-          VITE_GITHUB_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          VITE_GITHUB_APP_ID: ${{ secrets.GITHUB_APP_ID }}
+          VITE_GITHUB_APP_NAME: ${{ secrets.GITHUB_APP_NAME || 'github-issues-chat' }}
           VITE_GITHUB_ISSUE_NUMBER: ${{ vars.GITHUB_ISSUE_NUMBER || '1' }}
           VITE_GITHUB_REPO_OWNER: ${{ github.repository_owner }}
           VITE_GITHUB_REPO_NAME: ${{ github.event.repository.name }}

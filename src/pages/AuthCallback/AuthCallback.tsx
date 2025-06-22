@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { githubAppAPI } from '../../services/api/github-app';
 import Loading from '../../components/common/Loading/Loading';
 import './AuthCallback.scss';
 
@@ -14,30 +15,40 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        const code = searchParams.get('code');
+        const installationId = searchParams.get('installation_id');
+        const setupAction = searchParams.get('setup_action');
         const error = searchParams.get('error');
         const errorDescription = searchParams.get('error_description');
 
         if (error) {
-          console.error('OAuth Error:', error, errorDescription);
-          setError(errorDescription || '인증 중 오류가 발생했습니다.');
+          console.error('GitHub App 설치 오류:', error, errorDescription);
+          setError(errorDescription || 'GitHub App 설치 중 오류가 발생했습니다.');
           setLoading(false);
           return;
         }
 
-        if (!code) {
-          setError('인증 코드를 받지 못했습니다.');
+        if (setupAction === 'install' && installationId) {
+          // GitHub App 설치 완료
+          console.log('✅ GitHub App 설치 완료:', installationId);
+          
+          // TODO: 서버에서 설치 토큰 생성
+          // 현재는 임시로 설치 ID 저장
+          localStorage.setItem('github_installation_id', installationId);
+          
+          // 성공적으로 설치 완료
           setLoading(false);
-          return;
+          navigate('/chat', { replace: true });
+          
+        } else if (setupAction === 'update') {
+          // GitHub App 업데이트 완료
+          console.log('✅ GitHub App 업데이트 완료');
+          setLoading(false);
+          navigate('/chat', { replace: true });
+          
+        } else {
+          setError('알 수 없는 설치 상태입니다.');
+          setLoading(false);
         }
-
-        // TODO: 서버에서 액세스 토큰 교환
-        // 현재는 임시로 로컬 스토리지에 코드 저장
-        localStorage.setItem('github_auth_code', code);
-        
-        // 성공적으로 인증 완료
-        setLoading(false);
-        navigate('/chat', { replace: true });
         
       } catch (err) {
         console.error('Auth callback error:', err);
@@ -52,7 +63,7 @@ const AuthCallback: React.FC = () => {
   if (loading) {
     return (
       <div className="auth-callback">
-        <Loading size="large" message="인증을 처리하고 있습니다..." />
+        <Loading size="large" message="GitHub App 설치를 처리하고 있습니다..." />
       </div>
     );
   }
@@ -61,7 +72,7 @@ const AuthCallback: React.FC = () => {
     return (
       <div className="auth-callback">
         <div className="auth-callback__error">
-          <h2>인증 오류</h2>
+          <h2>설치 오류</h2>
           <p>{error}</p>
           <button 
             onClick={() => navigate('/login')}
