@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useChat } from '../contexts/ChatContext';
-import { useAuth } from '../contexts/AuthContext';
 import '../styles/pages/ChatRoomPage.scss';
 
 const ChatRoomPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { state } = useChat();
-  const { user } = useAuth();
   const [message, setMessage] = useState('');
 
   const handleSendMessage = (e: React.FormEvent) => {
