@@ -54,9 +54,6 @@ export default defineConfig({
       }
     })
   ],
-  // HTML 파일 위치 지정
-  root: '.',
-  publicDir: 'public',
   // GitHub Pages를 위한 base URL 설정
   base: '/Github_Issues_Chat/',
   build: {
