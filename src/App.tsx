@@ -17,7 +17,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/">
       <ThemeProvider>
         <AuthProvider>
           <ChatProvider>

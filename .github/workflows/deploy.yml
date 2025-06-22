@@ -56,6 +56,8 @@ jobs:
           VITE_GITHUB_ISSUE_NUMBER: ${{ vars.GITHUB_ISSUE_NUMBER || '1' }}
           VITE_GITHUB_REPO_OWNER: ${{ github.repository_owner }}
           VITE_GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+          # 프로덕션 빌드 설정
+          NODE_ENV: production
           
       - name: 🚀 Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3

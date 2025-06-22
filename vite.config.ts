@@ -34,4 +34,15 @@ export default defineConfig({
       }
     })
   ],
+  // GitHub Pages를 위한 base URL 설정
+  base: '/Github_Issues_Chat/',
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      }
+    }
+  }
 })
