@@ -1,34 +1,42 @@
 import React, { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react';
 import { githubAppAPI } from '../services/api/github-app';
-import type { ChatMessage } from '../types';
+import type { ChatMessage, GitHubIssue } from '../types';
 
 interface ChatState {
   messages: ChatMessage[];
   loading: boolean;
+  sending: boolean;
   error: string | null;
+  issue: GitHubIssue | null;
 }
 
 interface ChatAction {
-  type: 'SET_MESSAGES' | 'ADD_MESSAGE' | 'SET_LOADING' | 'SET_ERROR';
+  type: 'SET_MESSAGES' | 'ADD_MESSAGE' | 'SET_LOADING' | 'SET_SENDING' | 'SET_ERROR' | 'SET_ISSUE';
   payload: any;
 }
 
 const initialState: ChatState = {
   messages: [],
   loading: false,
+  sending: false,
   error: null,
+  issue: null,
 };
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
     case 'SET_MESSAGES':
-      return { ...state, messages: action.payload };
+      return { ...state, messages: action.payload, loading: false };
     case 'ADD_MESSAGE':
       return { ...state, messages: [...state.messages, action.payload] };
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
+    case 'SET_SENDING':
+      return { ...state, sending: action.payload };
     case 'SET_ERROR':
-      return { ...state, error: action.payload };
+      return { ...state, error: action.payload, loading: false, sending: false };
+    case 'SET_ISSUE':
+      return { ...state, issue: action.payload };
     default:
       return state;
   }
@@ -39,6 +47,7 @@ interface ChatContextType {
   dispatch: React.Dispatch<ChatAction>;
   sendMessage: (content: string) => Promise<void>;
   refreshMessages: () => Promise<void>;
+  fetchIssueDetails: () => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -47,38 +56,33 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [state, dispatch] = useReducer(chatReducer, initialState);
 
   const sendMessage = useCallback(async (content: string) => {
+    dispatch({ type: 'SET_SENDING', payload: true });
     try {
       const token = localStorage.getItem('github_token');
-      if (!token) {
-        throw new Error('토큰이 없습니다.');
-      }
+      if (!token) throw new Error('토큰이 없습니다.');
 
-      dispatch({ type: 'SET_LOADING', payload: true });
-
-      // GitHub API로 댓글 작성
       const comment = await githubAppAPI.createComment(token, content);
       
-      // 메시지 형식으로 변환
       const message: ChatMessage = {
-      id: comment.id,
-      content: comment.body,
-      author: {
-        id: comment.user.id,
-        username: comment.user.login,
-        avatar: comment.user.avatar_url,
-      },
+        id: comment.id,
+        content: comment.body,
+        author: {
+          id: comment.user.id,
+          username: comment.user.login,
+          avatar: comment.user.avatar_url,
+        },
         timestamp: new Date(comment.created_at).toLocaleString('ko-KR'),
         isEdited: false,
-        isOwn: true, // TODO: 현재 사용자와 비교
-      htmlUrl: comment.html_url,
-    };
+        isOwn: true,
+        htmlUrl: comment.html_url,
+      };
       
       dispatch({ type: 'ADD_MESSAGE', payload: message });
-      dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
       console.error('메시지 전송 실패:', error);
       dispatch({ type: 'SET_ERROR', payload: '메시지 전송에 실패했습니다.' });
-      dispatch({ type: 'SET_LOADING', payload: false });
+    } finally {
+      dispatch({ type: 'SET_SENDING', payload: false });
     }
   }, []);
 
@@ -95,11 +99,9 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       dispatch({ type: 'SET_LOADING', payload: true });
       console.log('Fetching comments from GitHub API...');
       
-      // GitHub API로 댓글 목록 가져오기
       const comments = await githubAppAPI.getIssueComments(token);
       console.log('Comments received:', comments);
       
-      // 메시지 형식으로 변환
       const messages: ChatMessage[] = comments.map(comment => ({
         id: comment.id,
         content: comment.body,
@@ -110,7 +112,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         },
         timestamp: new Date(comment.created_at).toLocaleString('ko-KR'),
         isEdited: comment.created_at !== comment.updated_at,
-        isOwn: false, // TODO: 현재 사용자와 비교
+        isOwn: false,
         htmlUrl: comment.html_url,
       }));
       
@@ -124,8 +126,21 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
+  const fetchIssueDetails = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('github_token');
+      if (!token) return;
+      
+      const issueData = await githubAppAPI.getChatIssue(token);
+      dispatch({ type: 'SET_ISSUE', payload: issueData });
+    } catch (error) {
+      console.error('이슈 정보 로딩 실패:', error);
+      dispatch({ type: 'SET_ERROR', payload: '이슈 정보를 불러오는데 실패했습니다.' });
+    }
+  }, []);
+
   return (
-    <ChatContext.Provider value={{ state, dispatch, sendMessage, refreshMessages }}>
+    <ChatContext.Provider value={{ state, dispatch, sendMessage, refreshMessages, fetchIssueDetails }}>
       {children}
     </ChatContext.Provider>
   );

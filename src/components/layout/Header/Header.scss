@@ -93,4 +93,14 @@
         display: none;
       }
     }
-  }
+}
+
+.header__theme-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.header__theme-toggle:hover .header__theme-icon {
+  transform: rotate(15deg) scale(1.1);
+}

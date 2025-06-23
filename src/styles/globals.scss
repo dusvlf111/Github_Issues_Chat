@@ -74,10 +74,11 @@ body {
   --transition-slow: #{$transition-slow};
 
   // Light Theme
-  --bg-color: #{$gray-50};
+  --bg-color: #eceef3;
   --text-color: #{$gray-900};
   --text-secondary: #{$gray-600};
   --primary-color: #{$primary-color};
+  --primary-color-rgb: 3, 102, 214;
   --primary-hover: #{$primary-dark};
   --card-bg: white;
   --border-color: #{$gray-200};
@@ -129,6 +130,7 @@ body {
   --text-color: #{$gray-100};
   --text-secondary: #{$gray-500};
   --primary-color: #{$primary-light};
+  --primary-color-rgb: 31, 122, 232;
   --primary-hover: #{$primary-color};
   --card-bg: #{$gray-800};
   --border-color: #{$gray-700};

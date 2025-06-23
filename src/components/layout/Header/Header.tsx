@@ -6,7 +6,14 @@ import Avatar from '../../common/Avatar/Avatar';
 import { APP_CONFIG } from '../../../config/app';
 import './Header.scss';
 
-const Header: React.FC = () => {
+import sunIcon from '/img/png/sun.png';
+import moonIcon from '/img/png/moon.png';
+
+interface HeaderProps {
+  title?: string;
+}
+
+const Header: React.FC<HeaderProps> = ({ title }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -22,12 +29,8 @@ const Header: React.FC = () => {
         {/* 로고 영역 */}
         <div className="header__brand">
           <h1 className="header__title">
-            GitHub Issues Chat
+            {title || 'GitHub Issues Chat'}
           </h1>
-          <span className="header__subtitle">
-            {APP_CONFIG.github.repository.owner}/{APP_CONFIG.github.repository.name} 
-            #{APP_CONFIG.github.issueNumber}
-          </span>
         </div>
 
         {/* 사용자 메뉴 */}
@@ -40,7 +43,11 @@ const Header: React.FC = () => {
             aria-label="테마 변경"
             className="header__theme-toggle"
           >
-            {theme === 'dark' ? '🌙' : '☀️'}
+            <img 
+              src={theme === 'dark' ? sunIcon : moonIcon} 
+              alt="테마 변경 아이콘" 
+              className="header__theme-icon"
+            />
           </Button>
 
           {/* 사용자 정보 */}
