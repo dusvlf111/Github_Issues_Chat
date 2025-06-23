@@ -54,7 +54,7 @@ jobs:
           # GitHub Secrets에서 가져오는 환경변수들
           VITE_GITHUB_APP_ID: ${{ secrets.APP_ID }}
           VITE_GITHUB_APP_NAME: ${{ secrets.APP_NAME || 'github-issues-chat' }}
-          VITE_GITHUB_ISSUE_NUMBER: ${{ vars.ISSUE_NUMBER || '1' }}
+          VITE_GITHUB_ISSUE_NUMBER: ${{ secrets.ISSUE_NUMBER || '1' }}
           VITE_GITHUB_REPO_OWNER: ${{ github.repository_owner }}
           VITE_GITHUB_REPO_NAME: ${{ github.event.repository.name }}
           # 프로덕션 빌드 설정
