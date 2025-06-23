@@ -71,10 +71,10 @@ export interface AuthContextType {
     user: GitHubUser | null;
     token: string | null;
     loading: boolean;
-    error: string | null;
-    login: (token: string) => Promise<void>;
+    login: (token?: string) => void | Promise<void>;
     logout: () => void;
     refreshUser: () => Promise<void>;
+    setToken: (token: string) => Promise<void>;
 }
 
 // 채팅 상태 관리 타입

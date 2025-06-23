@@ -8,12 +8,22 @@ class GitHubAppAPI {
   private repoName = import.meta.env.VITE_GITHUB_REPO_NAME || 'github-issues-chat';
   private issueNumber = parseInt(import.meta.env.VITE_GITHUB_ISSUE_NUMBER || '1');
 
+  constructor() {
+    console.log('GitHubAppAPI initialized with:', {
+      baseURL: this.baseURL,
+      repoOwner: this.repoOwner,
+      repoName: this.repoName,
+      issueNumber: this.issueNumber
+    });
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
     token?: string
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    console.log('Making API request to:', url);
     
     const headers: Record<string, string> = {
       'Accept': GITHUB_APP_CONFIG.api.acceptHeader,
@@ -34,8 +44,11 @@ class GitHubAppAPI {
         headers,
       });
 
+      console.log('API response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('API error:', errorData);
         const error: ApiError = {
           message: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
           status: response.status,
@@ -44,8 +57,11 @@ class GitHubAppAPI {
         throw error;
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('API response data:', data);
+      return data;
     } catch (error) {
+      console.error('API request failed:', error);
       if (error instanceof Error && error.name === 'TypeError') {
         throw new Error('네트워크 연결을 확인해주세요.');
       }

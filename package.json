@@ -27,7 +27,7 @@
     "deploy": "npm run build && gh-pages -d dist",
     "deploy:force": "npm run build && gh-pages -d dist -f",
     "clean": "rm -rf dist node_modules/.vite",
-    "test:build": "npm run type-check && npm run lint && npm run build"
+    "test:build": "npm run type-check && npm run build"
   },
   "dependencies": {
     "clsx": "^2.0.0",

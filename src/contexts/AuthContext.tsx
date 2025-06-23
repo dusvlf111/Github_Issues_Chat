@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { GITHUB_APP_CONFIG } from '../config/github-app';
 import { githubAppAPI } from '../services/api/github-app';
 import type { GitHubUser } from '../types';
 
@@ -8,7 +7,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: () => void;
+  login: (token?: string) => void | Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   setToken: (token: string) => Promise<void>;
@@ -24,8 +23,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
-    const savedToken = localStorage.getItem('github_app_token');
+    const savedToken = localStorage.getItem('github_token');
+    console.log('AuthContext useEffect - savedToken exists:', !!savedToken);
     if (savedToken) {
+      console.log('Setting token and authenticating...');
       setTokenState(savedToken);
       setIsAuthenticated(true);
       refreshUser();
@@ -48,12 +49,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const setToken = async (newToken: string) => {
     try {
+      console.log('setToken called with token length:', newToken.length);
       setTokenState(newToken);
       setIsAuthenticated(true);
-      localStorage.setItem('github_app_token', newToken);
+      localStorage.setItem('github_token', newToken);
+      console.log('Token saved to localStorage');
       
       // 토큰으로 사용자 정보 가져오기
       const userData = await githubAppAPI.getUser(newToken);
+      console.log('User data received:', userData);
       setUser(userData);
     } catch (error) {
       console.error('토큰 설정 실패:', error);
@@ -62,24 +66,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const login = () => {
-    if (!GITHUB_APP_CONFIG.appId) {
-      console.error('GitHub App ID가 설정되지 않았습니다.');
-      alert('GitHub App이 설정되지 않았습니다.');
+  const login = async (personalToken?: string) => {
+    // Personal Access Token이 제공된 경우
+    if (personalToken) {
+      await setToken(personalToken);
       return;
     }
-    
-    // GitHub App 설치 페이지로 리디렉션
-    const installUrl = githubAppAPI.getInstallUrl();
-    console.log('🔗 GitHub App 설치 URL:', installUrl);
-    window.location.href = installUrl;
+
+    // GitHub App 방식은 더 이상 지원하지 않음
+    console.warn('GitHub App 방식은 더 이상 지원하지 않습니다. Personal Access Token을 사용해주세요.');
+    alert('Personal Access Token을 입력해주세요.');
   };
 
   const logout = () => {
     setUser(null);
     setTokenState(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('github_app_token');
+    localStorage.removeItem('github_token');
   };
 
   return (

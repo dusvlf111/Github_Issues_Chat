@@ -48,30 +48,30 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const sendMessage = useCallback(async (content: string) => {
     try {
-      const token = localStorage.getItem('github_app_token');
+      const token = localStorage.getItem('github_token');
       if (!token) {
         throw new Error('토큰이 없습니다.');
       }
 
       dispatch({ type: 'SET_LOADING', payload: true });
-      
+
       // GitHub API로 댓글 작성
       const comment = await githubAppAPI.createComment(token, content);
       
       // 메시지 형식으로 변환
       const message: ChatMessage = {
-        id: comment.id,
-        content: comment.body,
-        author: {
-          id: comment.user.id,
-          username: comment.user.login,
-          avatar: comment.user.avatar_url,
-        },
+      id: comment.id,
+      content: comment.body,
+      author: {
+        id: comment.user.id,
+        username: comment.user.login,
+        avatar: comment.user.avatar_url,
+      },
         timestamp: new Date(comment.created_at).toLocaleString('ko-KR'),
         isEdited: false,
         isOwn: true, // TODO: 현재 사용자와 비교
-        htmlUrl: comment.html_url,
-      };
+      htmlUrl: comment.html_url,
+    };
       
       dispatch({ type: 'ADD_MESSAGE', payload: message });
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -84,15 +84,20 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const refreshMessages = useCallback(async () => {
     try {
-      const token = localStorage.getItem('github_app_token');
+      console.log('refreshMessages called');
+      const token = localStorage.getItem('github_token');
+      console.log('Token exists:', !!token);
       if (!token) {
+        console.log('No token found, returning early');
         return;
       }
 
       dispatch({ type: 'SET_LOADING', payload: true });
+      console.log('Fetching comments from GitHub API...');
       
       // GitHub API로 댓글 목록 가져오기
       const comments = await githubAppAPI.getIssueComments(token);
+      console.log('Comments received:', comments);
       
       // 메시지 형식으로 변환
       const messages: ChatMessage[] = comments.map(comment => ({
@@ -109,6 +114,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         htmlUrl: comment.html_url,
       }));
       
+      console.log('Messages converted:', messages);
       dispatch({ type: 'SET_MESSAGES', payload: messages });
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {

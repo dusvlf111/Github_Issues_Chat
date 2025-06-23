@@ -18,9 +18,12 @@ body {
   font-family: $font-family-base;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
   padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color $transition-normal, color $transition-normal;
 }
 
 // 테마별 CSS 변수 정의
@@ -69,6 +72,15 @@ body {
   --transition-fast: #{$transition-fast};
   --transition-normal: #{$transition-normal};
   --transition-slow: #{$transition-slow};
+
+  // Light Theme
+  --bg-color: #{$gray-50};
+  --text-color: #{$gray-900};
+  --text-secondary: #{$gray-600};
+  --primary-color: #{$primary-color};
+  --primary-hover: #{$primary-dark};
+  --card-bg: white;
+  --border-color: #{$gray-200};
 }
 
 // 라이트 테마
@@ -111,14 +123,22 @@ body {
   --border-focus: var(--color-primary);
   
   --shadow-color: rgba(0, 0, 0, 0.3);
+
+  // Dark Theme
+  --bg-color: #{$gray-900};
+  --text-color: #{$gray-100};
+  --text-secondary: #{$gray-500};
+  --primary-color: #{$primary-light};
+  --primary-hover: #{$primary-color};
+  --card-bg: #{$gray-800};
+  --border-color: #{$gray-700};
 }
 
 // 앱 컨테이너
 .app {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 .app__loading {
@@ -181,21 +201,21 @@ body {
 
 // 스크롤바 스타일링
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--bg-color);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-primary);
-  border-radius: var(--radius-sm);
+  background: var(--border-color);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--text-secondary);
 }
 
 // 포커스 아웃라인
