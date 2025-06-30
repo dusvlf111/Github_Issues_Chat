@@ -31,6 +31,32 @@ export interface GitHubComment {
     issue_url: string;
 }
 
+// 채팅방 관련 타입
+export interface ChatRoom {
+    id: number;
+    number: number;
+    title: string;
+    body?: string;
+    state: string;
+    comments: number;
+    created_at: string;
+    updated_at: string;
+    user: GitHubUser;
+    html_url: string;
+    lastMessage?: string;
+    lastMessageTime?: string;
+}
+
+export interface CreateChatRoomRequest {
+    title: string;
+    body?: string;
+}
+
+export interface UpdateChatRoomRequest {
+    title?: string;
+    body?: string;
+}
+
 // 채팅 앱 관련 타입
 export interface ChatMessage {
     id: number;

@@ -1,0 +1,51 @@
+.chat-room-form {
+  .form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .description-field {
+    .input-field {
+      min-height: 120px;
+    }
+  }
+
+  .form-info {
+    background-color: var(--info-bg-color);
+    border: 1px solid var(--info-border-color);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: var(--info-text-color);
+
+    .info-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .info-text {
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+}
+
+// 다크 모드 대응
+[data-theme="dark"] {
+  .chat-room-form {
+    .form-info {
+      background-color: var(--info-bg-color);
+      border-color: var(--info-border-color);
+      color: var(--info-text-color);
+    }
+  }
+} 

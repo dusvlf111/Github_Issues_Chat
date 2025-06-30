@@ -1,0 +1,71 @@
+.input-group {
+  margin-bottom: 16px;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+    }
+
+    &::placeholder {
+      color: var(--text-muted);
+    }
+
+    &.error {
+      border-color: var(--error-color);
+      box-shadow: 0 0 0 3px rgba(var(--error-color-rgb), 0.1);
+    }
+  }
+
+  textarea.input-field {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  .error-message {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--error-color);
+  }
+
+  .help-text {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+}
+
+// 다크 모드 대응
+[data-theme="dark"] {
+  .input-group {
+    .input-field {
+      background-color: var(--bg-color);
+      border-color: var(--border-color);
+      color: var(--text-color);
+
+      &:focus {
+        border-color: var(--primary-color);
+      }
+    }
+  }
+} 
