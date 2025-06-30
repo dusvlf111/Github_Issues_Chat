@@ -20,7 +20,10 @@ class GitHubAppAPI {
     options: RequestInit = {},
     token?: string
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
+    // 캐시 방지를 위한 타임스탬프 추가
+    const timestamp = Date.now();
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const url = `${this.baseURL}${endpoint}${separator}_t=${timestamp}`;
     console.log('Making API request to:', url);
     
     const headers: Record<string, string> = {
