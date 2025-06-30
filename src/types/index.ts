@@ -19,6 +19,14 @@ export interface GitHubIssue {
     updated_at: string;
     user: GitHubUser;
     html_url: string;
+    labels: GitHubLabel[];
+}
+
+export interface GitHubLabel {
+    id: number;
+    name: string;
+    color: string;
+    description?: string;
 }
 
 export interface GitHubComment {
@@ -45,16 +53,19 @@ export interface ChatRoom {
     html_url: string;
     lastMessage?: string;
     lastMessageTime?: string;
+    labels: GitHubLabel[];
 }
 
 export interface CreateChatRoomRequest {
     title: string;
     body?: string;
+    labels?: string[];
 }
 
 export interface UpdateChatRoomRequest {
     title?: string;
     body?: string;
+    labels?: string[];
 }
 
 // 채팅 앱 관련 타입

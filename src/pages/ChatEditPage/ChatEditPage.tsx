@@ -31,6 +31,14 @@ const ChatEditPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // 먼저 이슈가 채팅방인지 확인
+      const isChatRoom = await githubAPI.isChatRoom(token, parseInt(issueNumber));
+      if (!isChatRoom) {
+        setError('이 이슈는 채팅방이 아닙니다. "chat" 라벨이 필요합니다.');
+        return;
+      }
+      
       const room = await githubAPI.getChatRoom(token, parseInt(issueNumber));
       setChatRoom(room);
       
@@ -51,7 +59,14 @@ const ChatEditPage: React.FC = () => {
     
     try {
       setFormLoading(true);
-      await githubAPI.updateChatRoom(token, parseInt(issueNumber), data);
+      
+      // "chat" 라벨이 유지되도록 수정
+      const updateData = {
+        ...data,
+        labels: ['chat'] // "chat" 라벨 유지
+      };
+      
+      await githubAPI.updateChatRoom(token, parseInt(issueNumber), updateData);
       navigate(`/chat/${issueNumber}`);
     } catch (err) {
       console.error('채팅방 수정 중 오류:', err);

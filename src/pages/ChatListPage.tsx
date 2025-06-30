@@ -50,6 +50,10 @@ const ChatListPage: React.FC = () => {
     
     try {
       setFormLoading(true);
+      
+      // "chat" 라벨이 존재하는지 확인하고 없으면 생성
+      await githubAPI.ensureChatLabel(token);
+      
       const newRoom = await githubAPI.createChatRoom(token, data);
       setChatRooms(prev => [newRoom, ...prev]);
       setShowCreateModal(false);
@@ -192,7 +196,12 @@ const ChatListPage: React.FC = () => {
             <div key={room.number} className="chat-room-item">
               <Link to={`/chat/${room.number}`} className="room-link">
                 <div className="room-info">
-                  <h3 className="room-title">{room.title}</h3>
+                  <div className="room-header">
+                    <h3 className="room-title">{room.title}</h3>
+                    {room.labels && room.labels.some(label => label.name === 'chat') && (
+                      <span className="room-label chat-label">💬 채팅</span>
+                    )}
+                  </div>
                   <p className="room-last-message">
                     {room.lastMessage || '아직 메시지가 없습니다.'}
                   </p>

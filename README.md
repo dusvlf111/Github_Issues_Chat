@@ -96,12 +96,6 @@ npm install --legacy-peer-deps
 # GitHub Repository 설정 (Issues 댓글용)
 VITE_GITHUB_REPO_OWNER=dusvlf111
 VITE_GITHUB_REPO_NAME=Github_Issues_Chat
-VITE_GITHUB_ISSUE_NUMBER=1
-
-# Utterances 설정 (GitHub Issues 기반 댓글)
-VITE_UTTERANCES_REPO=dusvlf111/Github_Issues_Chat
-VITE_UTTERANCES_ISSUE_TERM=GitHub Issues Chat - 댓글
-VITE_UTTERANCES_LABEL=chat-comments
 
 # 앱 설정
 VITE_APP_NAME=GitHub Issues Chat
@@ -117,8 +111,6 @@ npm run dev
 
 ### 1. GitHub Repository 설정
 1. GitHub Repository에서 Issues 기능이 활성화되어 있어야 함
-2. 채팅용 Issue 생성 (예: "GitHub Issues Chat - 댓글")
-3. Issue 번호를 환경변수에 설정
 
 ### 2. Personal Access Token 발급
 1. [GitHub.com](https://github.com) → Settings → Developer settings
@@ -134,7 +126,6 @@ npm run dev
 ### 3. 환경변수 설정
 - `VITE_GITHUB_REPO_OWNER`: Repository 소유자
 - `VITE_GITHUB_REPO_NAME`: Repository 이름
-- `VITE_GITHUB_ISSUE_NUMBER`: 채팅용 Issue 번호
 
 ## 💬 채팅 시스템
 
@@ -142,6 +133,11 @@ npm run dev
 - **UI**: 그룹채팅방 형태 (카카오톡, 슬랙 스타일)
 - **백엔드**: GitHub Issues 댓글 시스템
 - **실시간성**: 페이지 새로고침 시 최신 댓글 동기화
+
+### 라벨 시스템
+- **자동 라벨링**: 새 채팅방 생성 시 "chat" 라벨이 자동으로 추가됩니다
+- **채팅방 필터링**: "chat" 라벨이 붙은 이슈만 채팅방으로 인식됩니다
+- **라벨 관리**: "chat" 라벨이 없는 이슈는 채팅방으로 접근할 수 없습니다
 
 ### 메시지 저장
 - 모든 채팅 메시지는 GitHub Issues의 댓글로 저장

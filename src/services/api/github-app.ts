@@ -6,14 +6,12 @@ class GitHubAppAPI {
   private baseURL = GITHUB_APP_CONFIG.api.baseUrl;
   private repoOwner = import.meta.env.VITE_GITHUB_REPO_OWNER || 'demo-user';
   private repoName = import.meta.env.VITE_GITHUB_REPO_NAME || 'github-issues-chat';
-  private issueNumber = parseInt(import.meta.env.VITE_GITHUB_ISSUE_NUMBER || '1');
 
   constructor() {
     console.log('GitHubAppAPI initialized with:', {
       baseURL: this.baseURL,
       repoOwner: this.repoOwner,
-      repoName: this.repoName,
-      issueNumber: this.issueNumber
+      repoName: this.repoName
     });
   }
 
@@ -97,28 +95,28 @@ class GitHubAppAPI {
     return this.request<GitHubUser>('/user', {}, token);
   }
 
-  // 채팅방 이슈 정보 조회
-  async getChatIssue(token: string): Promise<GitHubIssue> {
+  // 채팅방 이슈 정보 조회 (이슈 번호 필수)
+  async getChatIssue(token: string, issueNumber: number): Promise<GitHubIssue> {
     return this.request<GitHubIssue>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${this.issueNumber}`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
       {},
       token
     );
   }
 
-  // 이슈 댓글 목록 조회
-  async getIssueComments(token: string): Promise<GitHubComment[]> {
+  // 이슈 댓글 목록 조회 (이슈 번호 필수)
+  async getIssueComments(token: string, issueNumber: number): Promise<GitHubComment[]> {
     return this.request<GitHubComment[]>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${this.issueNumber}/comments`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}/comments`,
       {},
       token
     );
   }
 
-  // 새 댓글 작성
-  async createComment(token: string, body: string): Promise<GitHubComment> {
+  // 새 댓글 작성 (이슈 번호 필수)
+  async createComment(token: string, body: string, issueNumber: number): Promise<GitHubComment> {
     return this.request<GitHubComment>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${this.issueNumber}/comments`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}/comments`,
       {
         method: 'POST',
         body: JSON.stringify({ body }),
