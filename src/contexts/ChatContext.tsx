@@ -13,7 +13,7 @@ interface ChatState {
 }
 
 interface ChatAction {
-  type: 'SET_MESSAGES' | 'ADD_MESSAGE' | 'SET_LOADING' | 'SET_SENDING' | 'SET_ERROR' | 'SET_ISSUE' | 'SET_ISSUE_NUMBER' | 'SET_REFRESHING';
+  type: 'SET_MESSAGES' | 'ADD_MESSAGE' | 'UPDATE_MESSAGE' | 'DELETE_MESSAGE' | 'SET_LOADING' | 'SET_SENDING' | 'SET_ERROR' | 'SET_ISSUE' | 'SET_ISSUE_NUMBER' | 'SET_REFRESHING';
   payload: any;
 }
 
@@ -33,6 +33,18 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
       return { ...state, messages: action.payload, loading: false };
     case 'ADD_MESSAGE':
       return { ...state, messages: [...state.messages, action.payload] };
+    case 'UPDATE_MESSAGE':
+      return { 
+        ...state, 
+        messages: state.messages.map(msg => 
+          msg.id === action.payload.id ? { ...msg, content: action.payload.content, isEdited: true } : msg
+        ) 
+      };
+    case 'DELETE_MESSAGE':
+      return { 
+        ...state, 
+        messages: state.messages.filter(msg => msg.id !== action.payload) 
+      };
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     case 'SET_SENDING':
@@ -54,6 +66,8 @@ interface ChatContextType {
   state: ChatState;
   dispatch: React.Dispatch<ChatAction>;
   sendMessage: (content: string, issueNumber?: number) => Promise<void>;
+  editMessage: (messageId: number, content: string) => Promise<void>;
+  deleteMessage: (messageId: number) => Promise<void>;
   refreshMessages: (issueNumber?: number) => Promise<void>;
   fetchIssueDetails: (issueNumber?: number) => Promise<void>;
   setCurrentIssueNumber: (issueNumber: number) => void;
@@ -169,6 +183,105 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [state.currentIssueNumber, state.isRefreshing]);
 
+  // 즉시 새로고침 함수 (디바운싱 없음)
+  const refreshMessagesImmediately = useCallback(async (issueNumber?: number) => {
+    try {
+      console.log('🚀 Immediate refresh called with issueNumber:', issueNumber);
+      
+      const token = localStorage.getItem('github_token');
+      if (!token) {
+        console.log('❌ No token found, returning early');
+        return;
+      }
+
+      const targetIssueNumber = issueNumber || state.currentIssueNumber;
+      if (!targetIssueNumber) {
+        console.log('❌ No issue number found, returning early');
+        return;
+      }
+
+      console.log('📡 Fetching comments from GitHub API immediately...');
+      dispatch({ type: 'SET_LOADING', payload: true });
+      
+      const comments = await githubAPI.getMessages(token, {}, targetIssueNumber);
+      console.log('📨 Comments received:', comments.length);
+      
+      const messages: ChatMessage[] = comments.map(comment => ({
+        id: comment.id,
+        content: comment.body,
+        author: {
+          id: comment.user.id,
+          username: comment.user.login,
+          avatar: comment.user.avatar_url,
+        },
+        timestamp: new Date(comment.created_at).toLocaleString('ko-KR'),
+        isEdited: comment.created_at !== comment.updated_at,
+        isOwn: false,
+        htmlUrl: comment.html_url,
+      }));
+      
+      console.log('💬 Messages converted:', messages.length);
+      dispatch({ type: 'SET_MESSAGES', payload: messages });
+      dispatch({ type: 'SET_LOADING', payload: false });
+      console.log('✅ Immediate refresh completed successfully');
+      
+    } catch (error) {
+      console.error('❌ 즉시 새로고침 실패:', error);
+      dispatch({ type: 'SET_ERROR', payload: '메시지를 불러오는데 실패했습니다.' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, [state.currentIssueNumber]);
+
+  const editMessage = useCallback(async (messageId: number, content: string) => {
+    try {
+      const token = localStorage.getItem('github_token');
+      if (!token) throw new Error('토큰이 없습니다.');
+
+      await githubAPI.editMessage(token, messageId, content);
+      
+      // 메시지 수정 후 즉시 새로고침
+      const targetIssueNumber = state.currentIssueNumber;
+      if (targetIssueNumber) {
+        console.log('🔄 Auto-refreshing messages after edit...');
+        await refreshMessagesImmediately(targetIssueNumber);
+      } else {
+        // 새로고침이 실패하면 로컬 상태에서만 업데이트
+        dispatch({ 
+          type: 'UPDATE_MESSAGE', 
+          payload: { 
+            id: messageId, 
+            content: content 
+          } 
+        });
+      }
+    } catch (error) {
+      console.error('메시지 수정 실패:', error);
+      dispatch({ type: 'SET_ERROR', payload: '메시지 수정에 실패했습니다.' });
+    }
+  }, [state.currentIssueNumber, refreshMessagesImmediately]);
+
+  const deleteMessage = useCallback(async (messageId: number) => {
+    try {
+      const token = localStorage.getItem('github_token');
+      if (!token) throw new Error('토큰이 없습니다.');
+
+      await githubAPI.deleteMessage(token, messageId);
+      
+      // 메시지 삭제 후 즉시 새로고침
+      const targetIssueNumber = state.currentIssueNumber;
+      if (targetIssueNumber) {
+        console.log('🔄 Auto-refreshing messages after deletion...');
+        await refreshMessagesImmediately(targetIssueNumber);
+      } else {
+        // 새로고침이 실패하면 로컬 상태에서만 제거
+        dispatch({ type: 'DELETE_MESSAGE', payload: messageId });
+      }
+    } catch (error) {
+      console.error('메시지 삭제 실패:', error);
+      dispatch({ type: 'SET_ERROR', payload: '메시지 삭제에 실패했습니다.' });
+    }
+  }, [state.currentIssueNumber, refreshMessagesImmediately]);
+
   const fetchIssueDetails = useCallback(async (issueNumber?: number) => {
     try {
       const token = localStorage.getItem('github_token');
@@ -194,6 +307,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       state, 
       dispatch, 
       sendMessage, 
+      editMessage,
+      deleteMessage,
       refreshMessages, 
       fetchIssueDetails, 
       setCurrentIssueNumber 
