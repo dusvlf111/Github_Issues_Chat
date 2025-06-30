@@ -1,0 +1,143 @@
+.chat-edit-page {
+  background: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 60px 20px;
+    text-align: center;
+
+    p {
+      margin-top: 16px;
+      color: var(--text-muted);
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 60px 20px;
+    text-align: center;
+    gap: 20px;
+
+    .back-btn {
+      padding: 12px 24px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--primary-dark);
+      }
+    }
+  }
+
+  .auth-required {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 60px 20px;
+    text-align: center;
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+  }
+
+  .chat-edit-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+    flex: 1;
+
+    .edit-header {
+      text-align: center;
+      margin-bottom: 2rem;
+
+      h1 {
+        font-size: 2rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--text-color);
+        font-weight: 700;
+      }
+
+      p {
+        font-size: 1rem;
+        color: var(--text-muted);
+        margin: 0;
+      }
+    }
+
+    .edit-form-container {
+      background: var(--card-bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+// 다크 모드 대응
+[data-theme="dark"] {
+  .chat-edit-page {
+    background: var(--bg-color);
+
+    .chat-edit-content {
+      .edit-header {
+        h1 {
+          color: var(--text-color);
+        }
+      }
+
+      .edit-form-container {
+        background: var(--card-bg-color);
+        border-color: var(--border-color);
+      }
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .chat-edit-page {
+    .chat-edit-content {
+      padding: 1rem;
+
+      .edit-header {
+        h1 {
+          font-size: 1.75rem;
+        }
+      }
+
+      .edit-form-container {
+        padding: 1.5rem;
+      }
+    }
+  }
+} 

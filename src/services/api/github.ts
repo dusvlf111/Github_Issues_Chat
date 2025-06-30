@@ -1,4 +1,4 @@
-import type { GitHubUser, GitHubIssue, GitHubComment, ApiError } from '../../types';
+import type { GitHubUser, GitHubIssue, GitHubComment, ApiError, ChatRoom, CreateChatRoomRequest, UpdateChatRoomRequest } from '../../types';
 import { APP_CONFIG } from '../../config/app';
 
 class GitHubAPI {
@@ -66,15 +66,100 @@ class GitHubAPI {
     );
   }
 
-  // 메시지 목록 조회 (이슈 댓글)
+  // 채팅방 목록 조회
+  async getChatRooms(token: string): Promise<ChatRoom[]> {
+    const issues = await this.request<GitHubIssue[]>(
+      `/repos/${this.repoOwner}/${this.repoName}/issues?state=open&sort=updated&direction=desc`,
+      {},
+      token
+    );
+    
+    // 각 채팅방의 마지막 메시지 정보를 가져오기
+    const chatRoomsWithLastMessage = await Promise.all(
+      issues.map(async (issue) => {
+        try {
+          const comments = await this.getMessages(token, { per_page: 1 }, issue.number);
+          const lastMessage = comments.length > 0 ? comments[0].body : '';
+          const lastMessageTime = comments.length > 0 ? comments[0].created_at : '';
+          
+          return {
+            ...issue,
+            lastMessage,
+            lastMessageTime,
+          } as ChatRoom;
+        } catch (error) {
+          return {
+            ...issue,
+            lastMessage: '',
+            lastMessageTime: '',
+          } as ChatRoom;
+        }
+      })
+    );
+    
+    return chatRoomsWithLastMessage;
+  }
+
+  // 채팅방 생성
+  async createChatRoom(token: string, data: CreateChatRoomRequest): Promise<ChatRoom> {
+    return this.request<ChatRoom>(
+      `/repos/${this.repoOwner}/${this.repoName}/issues`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      token
+    );
+  }
+
+  // 채팅방 수정
+  async updateChatRoom(
+    token: string,
+    issueNumber: number,
+    data: UpdateChatRoomRequest
+  ): Promise<ChatRoom> {
+    return this.request<ChatRoom>(
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      },
+      token
+    );
+  }
+
+  // 채팅방 삭제 (이슈 닫기)
+  async deleteChatRoom(token: string, issueNumber: number): Promise<ChatRoom> {
+    return this.request<ChatRoom>(
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ state: 'closed' }),
+      },
+      token
+    );
+  }
+
+  // 특정 채팅방 정보 조회
+  async getChatRoom(token: string, issueNumber: number): Promise<ChatRoom> {
+    return this.request<ChatRoom>(
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
+      {},
+      token
+    );
+  }
+
+  // 메시지 목록 조회 (이슈 댓글) - issueNumber 파라미터 추가
   async getMessages(
     token: string,
     params: {
       per_page?: number;
       page?: number;
       since?: string;
-    } = {}
+    } = {},
+    issueNumber?: number
   ): Promise<GitHubComment[]> {
+    const targetIssueNumber = issueNumber || this.issueNumber;
     const searchParams = new URLSearchParams();
     searchParams.set('per_page', String(params.per_page || 100));
     searchParams.set('page', String(params.page || 1));
@@ -84,16 +169,17 @@ class GitHubAPI {
     }
 
     return this.request<GitHubComment[]>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${this.issueNumber}/comments?${searchParams.toString()}`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${targetIssueNumber}/comments?${searchParams.toString()}`,
       {},
       token
     );
   }
 
-  // 새 메시지 전송 (댓글 생성)
-  async sendMessage(token: string, content: string): Promise<GitHubComment> {
+  // 새 메시지 전송 (댓글 생성) - issueNumber 파라미터 추가
+  async sendMessage(token: string, content: string, issueNumber?: number): Promise<GitHubComment> {
+    const targetIssueNumber = issueNumber || this.issueNumber;
     return this.request<GitHubComment>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${this.issueNumber}/comments`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${targetIssueNumber}/comments`,
       {
         method: 'POST',
         body: JSON.stringify({ body: content }),

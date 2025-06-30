@@ -2,7 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginPage from '../pages/LoginPage/LoginPage';
+import ChatListPage from '../pages/ChatListPage';
 import ChatPage from '../pages/ChatPage/ChatPage';
+import ChatEditPage from '../pages/ChatEditPage/ChatEditPage';
 import AuthCallback from '../pages/AuthCallback/AuthCallback';
 import Loading from '../components/common/Loading/Loading';
 
@@ -22,19 +24,27 @@ const AppRouter: React.FC = () => {
     <Routes>
       <Route 
         path="/login" 
-        element={isAuthenticated ? <Navigate to="/chat" replace /> : <LoginPage />} 
+        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} 
       />
       <Route 
-        path="/chat" 
+        path="/" 
+        element={isAuthenticated ? <ChatListPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/chat/:issueNumber" 
         element={isAuthenticated ? <ChatPage /> : <Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/chat/:issueNumber/edit" 
+        element={isAuthenticated ? <ChatEditPage /> : <Navigate to="/login" replace />} 
       />
       <Route 
         path="/auth/callback" 
         element={<AuthCallback />} 
       />
       <Route 
-        path="/" 
-        element={<Navigate to={isAuthenticated ? "/chat" : "/login"} replace />} 
+        path="*" 
+        element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} 
       />
     </Routes>
   );

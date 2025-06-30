@@ -66,3 +66,62 @@ $font-weight-normal: 400;
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
+
+// CSS 변수 (다크 모드 대응)
+:root {
+  // 기본 색상
+  --primary-color: #{$primary-color};
+  --primary-color-rgb: 3, 102, 214;
+  --primary-light: #{$primary-light};
+  --primary-dark: #{$primary-dark};
+  
+  --success-color: #{$success-color};
+  --success-color-rgb: 40, 167, 69;
+  --danger-color: #{$danger-color};
+  --danger-color-rgb: 220, 53, 69;
+  --danger-hover-color: #c82333;
+  --warning-color: #{$warning-color};
+  --info-color: #{$info-color};
+  
+  // 배경 색상
+  --bg-color: #ffffff;
+  --card-bg-color: #f8f9fa;
+  --hover-color: #f1f3f4;
+  
+  // 텍스트 색상
+  --text-color: #{$gray-900};
+  --text-muted: #{$gray-600};
+  --text-light: #{$gray-500};
+  
+  // 보더 색상
+  --border-color: #{$gray-200};
+  --border-light: #{$gray-100};
+  
+  // 정보 색상
+  --info-bg-color: #e3f2fd;
+  --info-border-color: #bbdefb;
+  --info-text-color: #1565c0;
+  
+  // 그림자
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+}
+
+// 다크 모드
+[data-theme="dark"] {
+  --bg-color: #{$gray-900};
+  --card-bg-color: #{$gray-800};
+  --hover-color: #{$gray-700};
+  
+  --text-color: #{$gray-100};
+  --text-muted: #{$gray-400};
+  --text-light: #{$gray-500};
+  
+  --border-color: #{$gray-700};
+  --border-light: #{$gray-600};
+  
+  --info-bg-color: #1e3a5f;
+  --info-border-color: #2d5a8b;
+  --info-text-color: #90caf9;
+}

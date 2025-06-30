@@ -1,0 +1,291 @@
+.chat-list-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+
+  .chat-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .user-profile {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+
+          .user-name {
+            font-weight: 500;
+            color: var(--text-color);
+          }
+        }
+
+        .logout-btn {
+          padding: 8px 16px;
+          background-color: var(--danger-color);
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background-color: var(--danger-hover-color);
+          }
+        }
+      }
+    }
+  }
+
+  .chat-list-content {
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+
+      p {
+        margin-top: 16px;
+        color: var(--text-muted);
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+
+      p {
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        color: var(--text-muted);
+      }
+    }
+
+    .chat-room-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      margin-bottom: 12px;
+      background-color: var(--card-bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .room-link {
+        flex: 1;
+        text-decoration: none;
+        color: inherit;
+
+        .room-info {
+          .room-title {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+          }
+
+          .room-last-message {
+            margin: 0 0 8px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .room-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+
+            .room-creator {
+              font-weight: 500;
+            }
+
+            .room-timestamp {
+              &::before {
+                content: '•';
+                margin-right: 8px;
+              }
+            }
+
+            .room-message-count {
+              &::before {
+                content: '•';
+                margin-right: 8px;
+              }
+            }
+          }
+        }
+      }
+
+      .room-actions {
+        display: flex;
+        gap: 8px;
+        margin-left: 16px;
+      }
+    }
+  }
+
+  .auth-required {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+
+    p {
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.delete-confirmation {
+  text-align: center;
+
+  p {
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+    color: var(--text-color);
+
+    &:last-child {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+  }
+}
+
+// 다크 모드 대응
+[data-theme="dark"] {
+  .chat-list-page {
+    background-color: var(--bg-color);
+
+    .chat-list-header {
+      border-bottom-color: var(--border-color);
+
+      h1 {
+        color: var(--text-color);
+      }
+
+      .user-info {
+        .user-profile {
+          .user-name {
+            color: var(--text-color);
+          }
+        }
+      }
+    }
+
+    .chat-list-content {
+      .chat-room-item {
+        background-color: var(--card-bg-color);
+        border-color: var(--border-color);
+
+        &:hover {
+          border-color: var(--primary-color);
+        }
+
+        .room-link {
+          .room-info {
+            .room-title {
+              color: var(--text-color);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .chat-list-page {
+    padding: 16px;
+
+    .chat-list-header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    .chat-list-content {
+      .chat-room-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+
+        .room-actions {
+          margin-left: 0;
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+    }
+  }
+} 
