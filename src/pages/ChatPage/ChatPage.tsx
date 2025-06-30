@@ -52,6 +52,13 @@ const ChatPage: React.FC = () => {
       
       // ChatContext에 현재 이슈 번호 설정
       setCurrentIssueNumber(parseInt(issueNumber));
+      
+      // 채팅방 정보를 가져온 후 메시지도 함께 로드
+      if (isAuthenticated) {
+        console.log('Loading messages after chat room load...');
+        refreshMessages(parseInt(issueNumber));
+        fetchIssueDetails(parseInt(issueNumber));
+      }
     } catch (err) {
       console.error('채팅방 정보 로드 중 오류:', err);
       setRoomError('채팅방을 찾을 수 없습니다.');
@@ -60,17 +67,15 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // 인증 상태가 변경될 때만 메시지 새로고침 (중복 방지)
   useEffect(() => {
     console.log('ChatPage useEffect - isAuthenticated:', isAuthenticated, 'loading:', authLoading);
-    if (isAuthenticated && issueNumber) {
-      console.log('Calling refreshMessages...');
-      refreshMessages(parseInt(issueNumber));
-      fetchIssueDetails(parseInt(issueNumber));
+    // 이미 loadChatRoom에서 메시지를 로드하므로 중복 호출 방지
+    if (isAuthenticated && issueNumber && !roomLoading) {
+      console.log('Focusing input after authentication...');
       inputRef.current?.focus();
-    } else {
-      console.log('Not authenticated, skipping refreshMessages');
     }
-  }, [isAuthenticated, issueNumber]);
+  }, [isAuthenticated, authLoading]);
 
   console.log('ChatPage render - messages:', state.messages, 'loading:', state.loading, 'error:', state.error, 'isAuthenticated:', isAuthenticated);
 

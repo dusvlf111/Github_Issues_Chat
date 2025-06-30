@@ -35,7 +35,7 @@ const ChatListPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const rooms = await githubAPI.getChatRooms(token);
+      const rooms = await githubAPI.getChatRoomsOptimized(token);
       setChatRooms(rooms);
     } catch (err) {
       console.error('채팅방 목록 로드 중 오류:', err);

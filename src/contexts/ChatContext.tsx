@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useRef, type ReactNode } from 'react';
 import { githubAPI } from '../services/api/github';
 import type { ChatMessage, GitHubIssue } from '../types';
 
@@ -9,10 +9,11 @@ interface ChatState {
   error: string | null;
   issue: GitHubIssue | null;
   currentIssueNumber: number | null;
+  isRefreshing: boolean;
 }
 
 interface ChatAction {
-  type: 'SET_MESSAGES' | 'ADD_MESSAGE' | 'SET_LOADING' | 'SET_SENDING' | 'SET_ERROR' | 'SET_ISSUE' | 'SET_ISSUE_NUMBER';
+  type: 'SET_MESSAGES' | 'ADD_MESSAGE' | 'SET_LOADING' | 'SET_SENDING' | 'SET_ERROR' | 'SET_ISSUE' | 'SET_ISSUE_NUMBER' | 'SET_REFRESHING';
   payload: any;
 }
 
@@ -23,6 +24,7 @@ const initialState: ChatState = {
   error: null,
   issue: null,
   currentIssueNumber: null,
+  isRefreshing: false,
 };
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
@@ -41,6 +43,8 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
       return { ...state, issue: action.payload };
     case 'SET_ISSUE_NUMBER':
       return { ...state, currentIssueNumber: action.payload };
+    case 'SET_REFRESHING':
+      return { ...state, isRefreshing: action.payload };
     default:
       return state;
   }
@@ -59,6 +63,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
+  const refreshTimeoutRef = useRef<number | null>(null);
 
   const sendMessage = useCallback(async (content: string, issueNumber?: number) => {
     dispatch({ type: 'SET_SENDING', payload: true });
@@ -96,49 +101,73 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const refreshMessages = useCallback(async (issueNumber?: number) => {
     try {
-      console.log('refreshMessages called');
+      console.log('🔄 refreshMessages called with issueNumber:', issueNumber);
+      
+      // 기존 타임아웃이 있으면 취소
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+        console.log('⏰ Cancelled previous refresh timeout');
+      }
+      
+      // 이미 요청 중인지 확인
+      if (state.isRefreshing) {
+        console.log('⚠️ Already refreshing, skipping duplicate request');
+        return;
+      }
+      
       const token = localStorage.getItem('github_token');
-      console.log('Token exists:', !!token);
+      console.log('🔑 Token exists:', !!token);
       if (!token) {
-        console.log('No token found, returning early');
+        console.log('❌ No token found, returning early');
         return;
       }
 
       const targetIssueNumber = issueNumber || state.currentIssueNumber;
+      console.log('🎯 Target issue number:', targetIssueNumber);
       if (!targetIssueNumber) {
-        console.log('No issue number found, returning early');
+        console.log('❌ No issue number found, returning early');
         return;
       }
 
-      dispatch({ type: 'SET_LOADING', payload: true });
-      console.log('Fetching comments from GitHub API...');
+      // 디바운싱: 100ms 후에 실제 요청 실행
+      refreshTimeoutRef.current = setTimeout(async () => {
+        // 중복 요청 방지 플래그 설정
+        console.log('🚀 Starting message refresh...');
+        dispatch({ type: 'SET_REFRESHING', payload: true });
+        dispatch({ type: 'SET_LOADING', payload: true });
+        console.log('📡 Fetching comments from GitHub API...');
+        
+        const comments = await githubAPI.getMessages(token, {}, targetIssueNumber);
+        console.log('📨 Comments received:', comments.length);
+        
+        const messages: ChatMessage[] = comments.map(comment => ({
+          id: comment.id,
+          content: comment.body,
+          author: {
+            id: comment.user.id,
+            username: comment.user.login,
+            avatar: comment.user.avatar_url,
+          },
+          timestamp: new Date(comment.created_at).toLocaleString('ko-KR'),
+          isEdited: comment.created_at !== comment.updated_at,
+          isOwn: false,
+          htmlUrl: comment.html_url,
+        }));
+        
+        console.log('💬 Messages converted:', messages.length);
+        dispatch({ type: 'SET_MESSAGES', payload: messages });
+        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: 'SET_REFRESHING', payload: false });
+        console.log('✅ Message refresh completed successfully');
+      }, 100);
       
-      const comments = await githubAPI.getMessages(token, {}, targetIssueNumber);
-      console.log('Comments received:', comments);
-      
-      const messages: ChatMessage[] = comments.map(comment => ({
-        id: comment.id,
-        content: comment.body,
-        author: {
-          id: comment.user.id,
-          username: comment.user.login,
-          avatar: comment.user.avatar_url,
-        },
-        timestamp: new Date(comment.created_at).toLocaleString('ko-KR'),
-        isEdited: comment.created_at !== comment.updated_at,
-        isOwn: false,
-        htmlUrl: comment.html_url,
-      }));
-      
-      console.log('Messages converted:', messages);
-      dispatch({ type: 'SET_MESSAGES', payload: messages });
-      dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
-      console.error('메시지 새로고침 실패:', error);
+      console.error('❌ 메시지 새로고침 실패:', error);
       dispatch({ type: 'SET_ERROR', payload: '메시지를 불러오는데 실패했습니다.' });
       dispatch({ type: 'SET_LOADING', payload: false });
+      dispatch({ type: 'SET_REFRESHING', payload: false });
     }
-  }, [state.currentIssueNumber]);
+  }, [state.currentIssueNumber, state.isRefreshing]);
 
   const fetchIssueDetails = useCallback(async (issueNumber?: number) => {
     try {

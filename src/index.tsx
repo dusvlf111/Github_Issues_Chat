@@ -35,7 +35,5 @@ window.addEventListener('appinstalled', () => {
 
 // 앱 렌더링
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <App />
 );
