@@ -279,14 +279,14 @@ const ChatPage: React.FC = () => {
                             onClick={() => handleEditMessage(msg.id, msg.content)}
                             title="메시지 수정"
                           >
-                            ✏️
+                            <img src={`${import.meta.env.BASE_URL}img/icon/edit.png`} alt="수정" />
                           </button>
                           <button 
                             className="message-action-btn message-action-btn--delete"
                             onClick={() => handleDeleteMessage(msg.id)}
                             title="메시지 삭제"
                           >
-                            🗑️
+                            <img src={`${import.meta.env.BASE_URL}img/icon/eraser.png`} alt="삭제" />
                           </button>
                         </div>
                       )}

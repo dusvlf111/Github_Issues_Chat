@@ -362,6 +362,42 @@
   border-radius: 0.25rem;
   cursor: pointer;
   font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+  }
+
+  img {
+    background: var(--card-bg-color);
+    border-radius: 6px;
+    padding: 3px;
+    transition: background 0.2s;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+
+  &--edit {
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  &--delete {
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+[data-theme="dark"] .message-action-btn img {
+  background: rgba(255, 255, 255, 0.397);
 }
 
 .edit-message-modal {

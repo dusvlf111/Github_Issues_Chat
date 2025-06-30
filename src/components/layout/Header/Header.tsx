@@ -5,6 +5,7 @@ import Button from '../../common/Button/Button';
 import Avatar from '../../common/Avatar/Avatar';
 import { APP_CONFIG } from '../../../config/app';
 import './Header.scss';
+import { useNavigate } from 'react-router-dom';
 
 import sunIcon from '/img/png/sun.png';
 import moonIcon from '/img/png/moon.png';
@@ -16,6 +17,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     if (window.confirm('정말로 로그아웃하시겠습니까?')) {
@@ -28,9 +30,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       <div className="header__container">
         {/* 로고 영역 */}
         <div className="header__brand">
-          <h1 className="header__title">
-            {title || 'GitHub Issues Chat'}
-          </h1>
+          <h1 className="header__title" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>GitHub Issue Chat</h1>
         </div>
 
         {/* 사용자 메뉴 */}
