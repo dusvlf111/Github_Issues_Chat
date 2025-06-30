@@ -54,9 +54,6 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
         owner: repoInfo.owner,
         name: repoInfo.name,
       },
-      
-      // 채팅방으로 사용할 이슈 번호
-      issueNumber: parseInt(import.meta.env.VITE_GITHUB_ISSUE_NUMBER || '1'),
     },
     
     // 채팅 설정
@@ -126,7 +123,6 @@ function getRepositoryInfoFromURL(): { owner: string; name: string } {
     console.log('🔧 Repository Info:', {
       owner: APP_CONFIG.github.repository.owner,
       name: APP_CONFIG.github.repository.name,
-      issueNumber: APP_CONFIG.github.issueNumber,
       redirectUri: APP_CONFIG.github.redirectUri,
     });
   }

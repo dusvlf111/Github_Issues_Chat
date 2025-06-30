@@ -80,8 +80,7 @@ export const validateGitHubAppConfig = (): string[] => {
   // 필수 환경변수 검증
   const requiredEnvVars = [
     'VITE_GITHUB_REPO_OWNER',
-    'VITE_GITHUB_REPO_NAME',
-    'VITE_GITHUB_ISSUE_NUMBER'
+    'VITE_GITHUB_REPO_NAME'
   ];
   
   requiredEnvVars.forEach(envVar => {

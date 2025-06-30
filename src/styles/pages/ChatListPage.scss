@@ -120,11 +120,30 @@
         color: inherit;
 
         .room-info {
-          .room-title {
-            margin: 0 0 8px 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-color);
+          .room-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+
+            .room-title {
+              margin: 0;
+              font-size: 1.1rem;
+              font-weight: 600;
+              color: var(--text-color);
+            }
+
+            .room-label {
+              padding: 2px 8px;
+              border-radius: 12px;
+              font-size: 0.75rem;
+              font-weight: 500;
+              
+              &.chat-label {
+                background-color: #0e8a16;
+                color: white;
+              }
+            }
           }
 
           .room-last-message {

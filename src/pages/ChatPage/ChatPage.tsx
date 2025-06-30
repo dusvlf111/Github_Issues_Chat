@@ -39,6 +39,14 @@ const ChatPage: React.FC = () => {
     try {
       setRoomLoading(true);
       setRoomError(null);
+      
+      // 먼저 이슈가 채팅방인지 확인
+      const isChatRoom = await githubAPI.isChatRoom(token, parseInt(issueNumber));
+      if (!isChatRoom) {
+        setRoomError('이 이슈는 채팅방이 아닙니다. "chat" 라벨이 필요합니다.');
+        return;
+      }
+      
       const room = await githubAPI.getChatRoom(token, parseInt(issueNumber));
       setChatRoom(room);
       

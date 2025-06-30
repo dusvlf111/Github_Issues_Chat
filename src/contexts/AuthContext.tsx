@@ -22,16 +22,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 로컬 스토리지에서 토큰 확인
-    const savedToken = localStorage.getItem('github_token');
-    console.log('AuthContext useEffect - savedToken exists:', !!savedToken);
-    if (savedToken) {
-      console.log('Setting token and authenticating...');
-      setTokenState(savedToken);
-      setIsAuthenticated(true);
-      refreshUser();
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        // 로컬 스토리지에서 토큰 확인
+        const savedToken = localStorage.getItem('github_token');
+        console.log('AuthContext useEffect - savedToken exists:', !!savedToken);
+        console.log('AuthContext useEffect - savedToken length:', savedToken?.length || 0);
+        
+        if (savedToken) {
+          console.log('Setting token and authenticating...');
+          setTokenState(savedToken);
+          setIsAuthenticated(true);
+          
+          // 토큰으로 사용자 정보 가져오기
+          try {
+            console.log('Fetching user data with saved token...');
+            const userData = await githubAppAPI.getUser(savedToken);
+            console.log('User data received:', userData);
+            setUser(userData);
+            console.log('User state updated successfully');
+          } catch (error) {
+            console.error('사용자 정보 조회 실패:', error);
+            // 토큰이 만료되었을 수 있으므로 로그아웃
+            logout();
+          }
+        } else {
+          console.log('No saved token found, user is not authenticated');
+        }
+      } catch (error) {
+        console.error('인증 초기화 실패:', error);
+        logout();
+      } finally {
+        console.log('AuthContext initialization completed, setting loading to false');
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const refreshUser = async () => {

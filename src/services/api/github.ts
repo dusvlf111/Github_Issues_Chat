@@ -1,11 +1,10 @@
-import type { GitHubUser, GitHubIssue, GitHubComment, ApiError, ChatRoom, CreateChatRoomRequest, UpdateChatRoomRequest } from '../../types';
+import type { GitHubUser, GitHubIssue, GitHubComment, ApiError, ChatRoom, CreateChatRoomRequest, UpdateChatRoomRequest, GitHubLabel } from '../../types';
 import { APP_CONFIG } from '../../config/app';
 
 class GitHubAPI {
   private baseURL = 'https://api.github.com';
   private repoOwner = APP_CONFIG.github.repository.owner;
   private repoName = APP_CONFIG.github.repository.name;
-  private issueNumber = APP_CONFIG.github.issueNumber;
 
   private async request<T>(
     endpoint: string,
@@ -57,10 +56,10 @@ class GitHubAPI {
     return this.request<GitHubUser>('/user', {}, token);
   }
 
-  // 채팅방 이슈 정보 조회
-  async getChatIssue(token: string): Promise<GitHubIssue> {
+  // 채팅방 이슈 정보 조회 (이슈 번호 필수)
+  async getChatIssue(token: string, issueNumber: number): Promise<GitHubIssue> {
     return this.request<GitHubIssue>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${this.issueNumber}`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
       {},
       token
     );
@@ -74,9 +73,14 @@ class GitHubAPI {
       token
     );
     
+    // "chat" 라벨이 붙은 이슈만 필터링
+    const chatIssues = issues.filter(issue => 
+      issue.labels && issue.labels.some(label => label.name === 'chat')
+    );
+    
     // 각 채팅방의 마지막 메시지 정보를 가져오기
     const chatRoomsWithLastMessage = await Promise.all(
-      issues.map(async (issue) => {
+      chatIssues.map(async (issue) => {
         try {
           const comments = await this.getMessages(token, { per_page: 1 }, issue.number);
           const lastMessage = comments.length > 0 ? comments[0].body : '';
@@ -102,11 +106,17 @@ class GitHubAPI {
 
   // 채팅방 생성
   async createChatRoom(token: string, data: CreateChatRoomRequest): Promise<ChatRoom> {
+    // "chat" 라벨을 자동으로 추가
+    const requestData = {
+      ...data,
+      labels: ['chat', ...(data.labels || [])]
+    };
+    
     return this.request<ChatRoom>(
       `/repos/${this.repoOwner}/${this.repoName}/issues`,
       {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestData),
       },
       token
     );
@@ -118,11 +128,17 @@ class GitHubAPI {
     issueNumber: number,
     data: UpdateChatRoomRequest
   ): Promise<ChatRoom> {
+    // "chat" 라벨이 유지되도록 보장
+    const requestData = {
+      ...data,
+      labels: data.labels ? ['chat', ...data.labels.filter(label => label !== 'chat')] : undefined
+    };
+    
     return this.request<ChatRoom>(
       `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
       {
         method: 'PATCH',
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestData),
       },
       token
     );
@@ -149,7 +165,7 @@ class GitHubAPI {
     );
   }
 
-  // 메시지 목록 조회 (이슈 댓글) - issueNumber 파라미터 추가
+  // 메시지 목록 조회 (이슈 댓글) - issueNumber 파라미터 필수
   async getMessages(
     token: string,
     params: {
@@ -157,9 +173,8 @@ class GitHubAPI {
       page?: number;
       since?: string;
     } = {},
-    issueNumber?: number
+    issueNumber: number
   ): Promise<GitHubComment[]> {
-    const targetIssueNumber = issueNumber || this.issueNumber;
     const searchParams = new URLSearchParams();
     searchParams.set('per_page', String(params.per_page || 100));
     searchParams.set('page', String(params.page || 1));
@@ -169,17 +184,16 @@ class GitHubAPI {
     }
 
     return this.request<GitHubComment[]>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${targetIssueNumber}/comments?${searchParams.toString()}`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}/comments?${searchParams.toString()}`,
       {},
       token
     );
   }
 
-  // 새 메시지 전송 (댓글 생성) - issueNumber 파라미터 추가
-  async sendMessage(token: string, content: string, issueNumber?: number): Promise<GitHubComment> {
-    const targetIssueNumber = issueNumber || this.issueNumber;
+  // 새 메시지 전송 (댓글 생성) - issueNumber 파라미터 필수
+  async sendMessage(token: string, content: string, issueNumber: number): Promise<GitHubComment> {
     return this.request<GitHubComment>(
-      `/repos/${this.repoOwner}/${this.repoName}/issues/${targetIssueNumber}/comments`,
+      `/repos/${this.repoOwner}/${this.repoName}/issues/${issueNumber}/comments`,
       {
         method: 'POST',
         body: JSON.stringify({ body: content }),
@@ -233,10 +247,10 @@ class GitHubAPI {
     }
   }
 
-  // 이슈 존재 여부 확인
-  async checkIssueExists(token: string): Promise<boolean> {
+  // 이슈 존재 여부 확인 (특정 이슈 번호)
+  async checkIssueExists(token: string, issueNumber: number): Promise<boolean> {
     try {
-      await this.getChatIssue(token);
+      await this.getChatIssue(token, issueNumber);
       return true;
     } catch (error) {
       const apiError = error as ApiError;
@@ -244,6 +258,53 @@ class GitHubAPI {
         return false;
       }
       throw error;
+    }
+  }
+
+  // 라벨 목록 조회
+  async getLabels(token: string): Promise<GitHubLabel[]> {
+    return this.request<GitHubLabel[]>(
+      `/repos/${this.repoOwner}/${this.repoName}/labels`,
+      {},
+      token
+    );
+  }
+
+  // "chat" 라벨 생성 (없는 경우)
+  async ensureChatLabel(token: string): Promise<void> {
+    try {
+      // 기존 라벨 확인
+      const labels = await this.getLabels(token);
+      const chatLabel = labels.find(label => label.name === 'chat');
+      
+      if (!chatLabel) {
+        // "chat" 라벨이 없으면 생성
+        await this.request<GitHubLabel>(
+          `/repos/${this.repoOwner}/${this.repoName}/labels`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              name: 'chat',
+              color: '0e8a16', // GitHub 녹색
+              description: '채팅방으로 사용되는 이슈'
+            }),
+          },
+          token
+        );
+      }
+    } catch (error) {
+      console.warn('"chat" 라벨 생성 실패:', error);
+      // 라벨 생성 실패는 치명적이지 않으므로 경고만 출력
+    }
+  }
+
+  // 이슈가 채팅방인지 확인
+  async isChatRoom(token: string, issueNumber: number): Promise<boolean> {
+    try {
+      const issue = await this.getChatRoom(token, issueNumber);
+      return issue.labels && issue.labels.some(label => label.name === 'chat');
+    } catch (error) {
+      return false;
     }
   }
 }

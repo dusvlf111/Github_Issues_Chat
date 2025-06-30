@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import './LoginPage.scss';
 
 const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showTokenInput, setShowTokenInput] = useState(false);
+
+  // 인증되면 홈페이지로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleTokenSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

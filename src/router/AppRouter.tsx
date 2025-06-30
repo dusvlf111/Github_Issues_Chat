@@ -6,6 +6,7 @@ import ChatListPage from '../pages/ChatListPage';
 import ChatPage from '../pages/ChatPage/ChatPage';
 import ChatEditPage from '../pages/ChatEditPage/ChatEditPage';
 import AuthCallback from '../pages/AuthCallback/AuthCallback';
+import ProtectedRoute from '../components/auth/ProtectedRoute/ProtectedRoute';
 import Loading from '../components/common/Loading/Loading';
 
 const AppRouter: React.FC = () => {
@@ -28,15 +29,27 @@ const AppRouter: React.FC = () => {
       />
       <Route 
         path="/" 
-        element={isAuthenticated ? <ChatListPage /> : <Navigate to="/login" replace />} 
+        element={
+          <ProtectedRoute>
+            <ChatListPage />
+          </ProtectedRoute>
+        } 
       />
       <Route 
         path="/chat/:issueNumber" 
-        element={isAuthenticated ? <ChatPage /> : <Navigate to="/login" replace />} 
+        element={
+          <ProtectedRoute>
+            <ChatPage />
+          </ProtectedRoute>
+        } 
       />
       <Route 
         path="/chat/:issueNumber/edit" 
-        element={isAuthenticated ? <ChatEditPage /> : <Navigate to="/login" replace />} 
+        element={
+          <ProtectedRoute>
+            <ChatEditPage />
+          </ProtectedRoute>
+        } 
       />
       <Route 
         path="/auth/callback" 
