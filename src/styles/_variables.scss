@@ -1,10 +1,11 @@
 // 색상 변수
-$primary-color: #0366d6;
-$primary-light: #1f7ae8;
-$primary-dark: #0254b8;
+$primary-color: #5B9BD5;
+$primary-light: #7AB2D3;
+$primary-dark: #4A628A;
 
 $success-color: #28a745;
-$danger-color: #dc3545;
+$danger-color: #FF8A8A;
+$danger-hover-color: #FF4F4F;
 $warning-color: #ffc107;
 $info-color: #17a2b8;
 
@@ -70,16 +71,16 @@ $font-weight-bold: 700;
 // CSS 변수 (다크 모드 대응)
 :root {
   // 기본 색상
-  --primary-color: #{$primary-color};
-  --primary-color-rgb: 3, 102, 214;
-  --primary-light: #{$primary-light};
-  --primary-dark: #{$primary-dark};
+  --primary-color: #5B9BD5;
+  --primary-color-rgb: 91, 155, 213;
+  --primary-light: #7AB2D3;
+  --primary-dark: #4A628A;
   
   --success-color: #{$success-color};
   --success-color-rgb: 40, 167, 69;
-  --danger-color: #{$danger-color};
-  --danger-color-rgb: 220, 53, 69;
-  --danger-hover-color: #c82333;
+  --danger-color: #FF8A8A;
+  --danger-color-rgb: 255, 138, 138;
+  --danger-hover-color: #FF4F4F;
   --warning-color: #{$warning-color};
   --info-color: #{$info-color};
   

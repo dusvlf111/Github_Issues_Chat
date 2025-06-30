@@ -337,6 +337,14 @@ class GitHubAPI {
                   login
                   avatarUrl
                 }
+                timelineItems(last: 1, itemTypes: [ISSUE_COMMENT]) {
+                  nodes {
+                    ... on IssueComment {
+                      bodyText
+                      createdAt
+                    }
+                  }
+                }
               }
             }
           }
@@ -378,6 +386,7 @@ class GitHubAPI {
             issue.labels.nodes.some((label: any) => label.name === 'chat')
           )
           .map((issue: any) => {
+            const lastComment = issue.timelineItems?.nodes?.[0];
             return {
               id: issue.id,
               number: issue.number,
@@ -400,8 +409,8 @@ class GitHubAPI {
                 avatar_url: issue.author?.avatarUrl || '',
                 html_url: '', // GraphQL에서 제공하지 않음
               },
-              lastMessage: '', // 마지막 메시지 정보 제거
-              lastMessageTime: '', // 마지막 메시지 시간 제거
+              lastMessage: lastComment?.bodyText || '',
+              lastMessageTime: lastComment?.createdAt || '',
             } as ChatRoom;
           });
 

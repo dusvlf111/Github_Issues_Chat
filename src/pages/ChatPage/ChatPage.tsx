@@ -26,6 +26,8 @@ const ChatPage: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // 메시지 개수가 늘어날 때만 맨 아래로 스크롤+입력창 포커스
+  const prevMessageCount = useRef(state.messages.length);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -81,6 +83,24 @@ const ChatPage: React.FC = () => {
       inputRef.current?.focus();
     }
   }, [isAuthenticated, authLoading]);
+
+  // 메시지 개수가 늘어날 때만 맨 아래로 스크롤+입력창 포커스
+  useEffect(() => {
+    if (state.messages.length > prevMessageCount.current) {
+      scrollToBottom();
+      inputRef.current?.focus();
+    }
+    prevMessageCount.current = state.messages.length;
+  }, [state.messages.length]);
+
+  // 5초마다 메시지 자동 새로고침 (폴링)
+  useEffect(() => {
+    if (!issueNumber || !isAuthenticated) return;
+    const interval = setInterval(() => {
+      refreshMessages(parseInt(issueNumber));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [issueNumber, isAuthenticated, refreshMessages]);
 
   console.log('ChatPage render - messages:', state.messages, 'loading:', state.loading, 'error:', state.error, 'isAuthenticated:', isAuthenticated);
 
@@ -159,6 +179,13 @@ const ChatPage: React.FC = () => {
     } catch (err) {
       console.error('채팅방 삭제 중 오류:', err);
       alert('채팅방 삭제에 실패했습니다.');
+    }
+  };
+
+  // 수동 새로고침 버튼도 동일하게 적용
+  const handleManualRefresh = async () => {
+    if (issueNumber) {
+      await refreshMessages(parseInt(issueNumber));
     }
   };
 
@@ -299,7 +326,18 @@ const ChatPage: React.FC = () => {
           </div>
 
           <div className="floating-buttons">
-            <button onClick={() => issueNumber && refreshMessages(parseInt(issueNumber))} className="floating-btn" title="새로고침">
+            <button
+              onClick={() => navigate('/')}
+              className="floating-btn"
+              title="홈으로"
+              style={{ marginBottom: 8 }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12L2 12L12 3L22 12L20 12" />
+                <rect x="6" y="12" width="12" height="8" rx="2" />
+              </svg>
+            </button>
+            <button onClick={handleManualRefresh} className="floating-btn" title="새로고침">
               ↻
             </button>
             <button onClick={scrollToBottom} className="floating-btn" title="맨 아래로">

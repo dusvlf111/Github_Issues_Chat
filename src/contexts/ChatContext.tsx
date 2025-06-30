@@ -151,7 +151,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         dispatch({ type: 'SET_LOADING', payload: true });
         console.log('📡 Fetching comments from GitHub API...');
         
-        const comments = await githubAPI.getMessages(token, {}, targetIssueNumber);
+        // 항상 fresh 데이터를 받아오기 위해 since 파라미터에 현재 시간 사용
+        const comments = await githubAPI.getMessages(token, { since: String(Date.now()) }, targetIssueNumber);
         console.log('📨 Comments received:', comments.length);
         
         const messages: ChatMessage[] = comments.map(comment => ({

@@ -91,17 +91,23 @@
         flex: 1;
 
         h1 {
-          font-size: 2rem;
-          margin: 0 0 0.5rem 0;
-          color: var(--text-color);
-          font-weight: 700;
+          color: var(--primary-dark);
+          font-size: 2.2rem;
+          font-weight: 800;
+          letter-spacing: -1px;
+          text-shadow: 0 2px 8px rgba(74,98,138,0.08);
+          margin-bottom: 0.5rem;
         }
 
         .room-description {
-          font-size: 1rem;
-          color: var(--text-muted);
-          margin: 0 0 1rem 0;
-          line-height: 1.5;
+          color: #4A628A;
+          font-size: 1.15rem;
+          font-weight: 500;
+          background: rgba(122,178,211,0.10);
+          border-radius: 8px;
+          padding: 0.7em 1em;
+          margin-bottom: 1.2rem;
+          line-height: 1.7;
         }
 
         .room-meta {
@@ -420,6 +426,10 @@
       .room-info {
         h1 {
           color: var(--text-color);
+        }
+
+        .room-description {
+          color: #fff;
         }
       }
     }
