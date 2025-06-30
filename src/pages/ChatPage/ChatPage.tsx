@@ -8,17 +8,22 @@ import Header from '../../components/layout/Header/Header';
 import Button from '../../components/common/Button/Button';
 import Loading from '../../components/common/Loading/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage/ErrorMessage';
+import Modal from '../../components/common/Modal/Modal';
+import Input from '../../components/common/Input/Input';
 import './ChatPage.scss';
 
 const ChatPage: React.FC = () => {
   const { issueNumber } = useParams<{ issueNumber: string }>();
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, token } = useAuth();
-  const { state, sendMessage, refreshMessages, fetchIssueDetails, setCurrentIssueNumber } = useChat();
+  const { state, sendMessage, editMessage, deleteMessage, refreshMessages, fetchIssueDetails, setCurrentIssueNumber } = useChat();
   const [message, setMessage] = useState('');
   const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
   const [roomLoading, setRoomLoading] = useState(true);
   const [roomError, setRoomError] = useState<string | null>(null);
+  const [editingMessage, setEditingMessage] = useState<{ id: number; content: string } | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -94,6 +99,45 @@ const ChatPage: React.FC = () => {
         scrollToBottom();
       }, 0);
     }
+  };
+
+  const handleEditMessage = (messageId: number, currentContent: string) => {
+    setEditingMessage({ id: messageId, content: currentContent });
+    setEditContent(currentContent);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMessage || !editContent.trim()) return;
+    
+    try {
+      await editMessage(editingMessage.id, editContent.trim());
+      setShowEditModal(false);
+      setEditingMessage(null);
+      setEditContent('');
+      // 성공 피드백
+      console.log('✅ 메시지가 성공적으로 수정되었습니다.');
+    } catch (error) {
+      console.error('메시지 수정 실패:', error);
+      alert('메시지 수정에 실패했습니다.');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!confirm('정말로 이 메시지를 삭제하시겠습니까?')) return;
+    
+    try {
+      await deleteMessage(messageId);
+      // 성공 피드백
+      console.log('✅ 메시지가 성공적으로 삭제되었습니다.');
+    } catch (error) {
+      console.error('메시지 삭제 실패:', error);
+      alert('메시지 삭제에 실패했습니다.');
+    }
+  };
+
+  const canEditMessage = (messageAuthorId: number) => {
+    return user && messageAuthorId === user.id;
   };
 
   const canManageRoom = () => {
@@ -222,9 +266,30 @@ const ChatPage: React.FC = () => {
                     <div className="message-content">
                       <div className="message-header">
                         <span className="message-author">{msg.author?.username || 'Anonymous'}</span>
-                        <span className="message-time">{msg.timestamp}</span>
+                        <span className="message-time">
+                          {msg.timestamp}
+                          {msg.isEdited && <span className="message-edited"> (수정됨)</span>}
+                        </span>
                       </div>
                       <div className="message-text">{msg.content}</div>
+                      {canEditMessage(msg.author?.id || 0) && (
+                        <div className="message-actions">
+                          <button 
+                            className="message-action-btn message-action-btn--edit"
+                            onClick={() => handleEditMessage(msg.id, msg.content)}
+                            title="메시지 수정"
+                          >
+                            ✏️
+                          </button>
+                          <button 
+                            className="message-action-btn message-action-btn--delete"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            title="메시지 삭제"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -257,6 +322,46 @@ const ChatPage: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {/* 메시지 수정 모달 */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingMessage(null);
+          setEditContent('');
+        }}
+        title="메시지 수정"
+      >
+        <div className="edit-message-modal">
+          <Input
+            type="textarea"
+            value={editContent}
+            onChange={(value) => setEditContent(value)}
+            placeholder="메시지를 입력하세요"
+            rows={4}
+          />
+          <div className="edit-message-actions">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingMessage(null);
+                setEditContent('');
+              }}
+            >
+              취소
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveEdit}
+              disabled={!editContent.trim()}
+            >
+              수정
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

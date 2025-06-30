@@ -77,6 +77,11 @@ class GitHubAPI {
         throw error;
       }
 
+      // DELETE 요청의 경우 응답 본문이 없으므로 JSON 파싱을 시도하지 않음
+      if (options.method === 'DELETE') {
+        return undefined as T;
+      }
+
       return await response.json();
     } catch (error) {
       if (error instanceof Error && error.name === 'TypeError') {
@@ -135,7 +140,7 @@ class GitHubAPI {
 
         const viewer = data.data.viewer;
         const user: GitHubUser = {
-          id: parseInt(viewer.id),
+          id: viewer.id,
           login: viewer.login,
           name: viewer.name,
           email: viewer.email,
@@ -242,7 +247,7 @@ class GitHubAPI {
         }
 
         const githubIssue: GitHubIssue = {
-          id: parseInt(issue.id),
+          id: issue.id,
           number: issue.number,
           title: issue.title,
           body: issue.body,
@@ -252,13 +257,13 @@ class GitHubAPI {
           updated_at: issue.updatedAt,
           html_url: issue.url,
           labels: issue.labels.nodes.map((label: any) => ({
-            id: parseInt(label.id),
+            id: label.id,
             name: label.name,
             color: label.color,
             description: label.description,
           })),
           user: {
-            id: 0, // GraphQL에서 제공하지 않으므로 기본값
+            id: issue.author?.id || 0,
             login: issue.author?.login || 'unknown',
             name: undefined, // GraphQL에서 제공하지 않음
             email: undefined, // GraphQL에서 제공하지 않음
@@ -761,6 +766,7 @@ class GitHubAPI {
                       login
                       avatarUrl
                       url
+                      id
                     }
                   }
                 }
@@ -827,7 +833,7 @@ class GitHubAPI {
             html_url: comment.url,
             issue_url: `https://github.com/${this.repoOwner}/${this.repoName}/issues/${issueNumber}`,
             user: {
-              id: 0, // GraphQL에서 제공하지 않으므로 기본값
+              id: comment.author?.id || 0,
               login: comment.author?.login || 'unknown',
               name: undefined, // GraphQL에서 제공하지 않음
               email: undefined, // GraphQL에서 제공하지 않음

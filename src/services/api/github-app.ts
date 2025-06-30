@@ -189,7 +189,7 @@ class GitHubAppAPI {
 
         const viewer = data.data.viewer;
         const user: GitHubUser = {
-          id: parseInt(viewer.id),
+          id: viewer.id,
           login: viewer.login,
           name: viewer.name,
           email: viewer.email,
