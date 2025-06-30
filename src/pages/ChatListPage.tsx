@@ -8,11 +8,15 @@ import ChatRoomForm from '../components/chat/ChatRoomForm/ChatRoomForm';
 import Button from '../components/common/Button/Button';
 import Loading from '../components/common/Loading/Loading';
 import ErrorMessage from '../components/common/ErrorMessage/ErrorMessage';
+import { useTheme } from '../contexts/ThemeContext';
+import sunIcon from '/img/png/sun.png';
+import moonIcon from '/img/png/moon.png';
 import '../styles/pages/ChatListPage.scss';
 
 const ChatListPage: React.FC = () => {
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
   const [loading, setLoading] = useState(true);
@@ -157,24 +161,45 @@ const ChatListPage: React.FC = () => {
   return (
     <div className="chat-list-page">
       <header className="chat-list-header">
-        <h1>채팅방 목록</h1>
+        <h1>GitHub Issue Chat</h1>
         <div className="header-actions">
-          <Button
-            variant="primary"
-            onClick={() => setShowCreateModal(true)}
-            disabled={loading}
+          <button
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            aria-label="테마 변경"
+            style={{ marginLeft: 16 }}
           >
-            새 채팅방 만들기
-          </Button>
+            <img
+              src={theme === 'dark' ? sunIcon : moonIcon}
+              alt="테마 변경 아이콘"
+              style={{ width: 24, height: 24 }}
+            />
+          </button>
+        </div>
+      </header>
+
+      <div className="chat-list-actions-bar">
+        <div className="profile-logout-row">
           <div className="user-info">
             <div className="user-profile">
               <img src={user.avatar_url} alt={user.login} className="user-avatar" />
               <span className="user-name">{user.name || user.login}</span>
             </div>
+          </div>
+          <div className="logout-btn-wrap">
             <button onClick={logout} className="logout-btn">로그아웃</button>
           </div>
         </div>
-      </header>
+        <Button
+          variant="primary"
+          size="small"
+          onClick={() => setShowCreateModal(true)}
+          disabled={loading}
+          className="create-room-btn"
+        >
+          새 채팅방 만들기
+        </Button>
+      </div>
 
       <div className="chat-list-content">
         {loading ? (
@@ -192,51 +217,46 @@ const ChatListPage: React.FC = () => {
             </Button>
           </div>
         ) : (
-          chatRooms.map((room) => (
-            <div key={room.number} className="chat-room-item">
-              <Link to={`/chat/${room.number}`} className="room-link">
-                <div className="room-info">
+          <div className="chat-room-list">
+            {chatRooms.map((room) => (
+              <div key={room.number} className="chat-room-card">
+                <Link to={`/chat/${room.number}`} className="room-link">
                   <div className="room-header">
-                    <h3 className="room-title">{room.title}</h3>
-                    {room.labels && room.labels.some(label => label.name === 'chat') && (
-                      <span className="room-label chat-label">💬 채팅</span>
-                    )}
+                    <div className="room-title-row">
+                      <h3 className="room-title">{room.title}</h3>
+                    </div>
                   </div>
-                  <p className="room-last-message">
-                    {room.lastMessage || '아직 메시지가 없습니다.'}
-                  </p>
+                  <div className="room-last-message">
+                    {room.lastMessage ? room.lastMessage : <span className="no-message">아직 메시지가 없습니다.</span>}
+                  </div>
                   <div className="room-meta">
-                    <span className="room-creator">@{room.user.login}</span>
-                    <span className="room-timestamp">
-                      {room.lastMessageTime ? formatDate(room.lastMessageTime) : formatDate(room.created_at)}
-                    </span>
-                    <span className="room-message-count">
-                      {room.comments}개 메시지
-                    </span>
+                    <img src={room.user.avatar_url} alt={room.user.login} className="room-creator-avatar" />
+                    <span className="room-creator">{room.user.name || room.user.login}</span>
+                    <span className="room-timestamp">{formatDate(room.created_at)}</span>
+                    <span className="room-message-count">💬 {room.comments}</span>
                   </div>
-                </div>
-              </Link>
-              
-              {canManageRoom(room) && (
-                <div className="room-actions">
-                  <Button
-                    variant="secondary"
-                    size="small"
-                    onClick={() => openEditModal(room)}
-                  >
-                    수정
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="small"
-                    onClick={() => openDeleteModal(room)}
-                  >
-                    삭제
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))
+                </Link>
+                {canManageRoom(room) && (
+                  <div className="room-actions">
+                    <Button
+                      variant="secondary"
+                      size="small"
+                      onClick={() => openEditModal(room)}
+                    >
+                      수정
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="small"
+                      onClick={() => openDeleteModal(room)}
+                    >
+                      삭제
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
