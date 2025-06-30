@@ -100,9 +100,16 @@ const LoginPage: React.FC = () => {
               <div className="token-help">
                 <h4>🔑 Personal Access Token 발급 방법</h4>
                 <ol>
-                  <li>GitHub.com → Settings → Developer settings</li>
-                  <li>Personal access tokens → Tokens (classic)</li>
-                  <li>Generate new token → Generate new token (classic)</li>
+                  <li>
+                    <a 
+                      href="https://github.com/settings/tokens/new" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="token-link"
+                    >
+                      GitHub Personal Access Token 생성 페이지로 이동
+                    </a>
+                  </li>
                   <li>권한 설정: <code>repo</code>, <code>user</code></li>
                   <li>토큰을 복사하여 위에 입력</li>
                 </ol>
